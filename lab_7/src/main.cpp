@@ -54,7 +54,8 @@ public:
   
   virtual void draw()const override
   {
-      cout << "I am " << "Square and my area is " << getArea() << ", my Circumference: " << getCircumference() << endl;
+      cout << "I am " << "Square and my area is " << getArea() << ", my Circumference: " << getCircumference();
+      cout << " My position: " << "(" << wspolx << "," << wspoly << ")" << endl;
 
 
   }
@@ -93,7 +94,8 @@ public:
   virtual void draw()const override
   { 
 
-    cout << "I am " << "Circle and my area is " << getArea() << ", my Circumference: " << getCircumference() << endl;
+    cout << "I am " << "Circle and my area is " << getArea() << ", my Circumference: " << getCircumference();
+    cout << " My position: " << "(" << wspolx << "," << wspoly << ")" << endl;
 
   }
 
@@ -111,7 +113,7 @@ private:
 
 public:
 
-    StraightLine(int x1 = 1,int y1 = 0,int x2 = 2,int y2 = 1):Object(x1,y1){wspolx2 = x2;wspoly2 = y2;}
+    StraightLine(int x2 = 1,int y2 = 1,int x1 = 0,int y1 = 0):Object(x1,y1){wspolx2 = x2;wspoly2 = y2;}
     
     double get_length()const
     {
@@ -121,7 +123,8 @@ public:
 
     virtual void draw()const override
     {
-        cout << "I am " << "StraightLine and my length is " << get_length() << endl;
+        cout << "I am " << "StraightLine and my length is " << get_length();
+        cout << " My position: " << "(" << wspolx2 << "," << wspoly2 << ")" << endl;
     }
 
 
@@ -133,13 +136,14 @@ class CurvedLine : public Object
 
 public:
 
-    CurvedLine(double dl_line = 8.0){length = dl_line; }
+    CurvedLine(double dl_line = 8.0,int x = 0, int y =0):Object(x,y){length = dl_line; }
 
 
     virtual void draw()const override
     {
 
-        cout << "I am " << "CurvedLine and my length is " << length << endl;
+        cout << "I am " << "CurvedLine and my length is " << length;
+        cout << " My position: " << "(" << wspolx << "," << wspoly << ")" << endl;
 
     }
 
@@ -219,8 +223,12 @@ public:
 
     virtual Object* createObject()const override
     {
+        
+        int tmp_radius,tmp_x,tmp_y;
+        cout << "Insert radius, x,  y (Circle)" << endl;
+        cin >> tmp_radius >> tmp_x >> tmp_y;
 
-        return new Circle();
+        return new Circle(tmp_radius,tmp_x,tmp_y);
 
     }
 
@@ -231,8 +239,12 @@ class SquarePainter : public Painter
 {
 
     virtual Object* createObject()const override
-    {
-        return new Square();
+    {   
+
+        int tmp_side,tmp_x,tmp_y;
+        cout << "Insert side,  x,  y (square)" << endl;
+        cin >> tmp_side >> tmp_x >> tmp_y;
+        return new Square(tmp_side,tmp_x,tmp_y);
     }
 
 };
@@ -242,8 +254,14 @@ class StraightLinePainter : public Painter
 {
 
     virtual Object* createObject()const override
-    {
-        return new StraightLine();
+    {   
+
+
+        int tmp_x,tmp_y;
+        cout << "Insert x,  y  (Straight Line)" << endl;
+        cin >> tmp_x >> tmp_y;
+
+        return new StraightLine(tmp_x,tmp_y);
     }
 
 };
@@ -253,8 +271,13 @@ class CurvedLinePainter : public Painter
 {
 
     virtual Object* createObject()const override
-    {
-        return new CurvedLine();
+    {   
+        int tmp_x,tmp_y,length;
+        cout << "Insert length ,  x,  y (curved line)" << endl;
+        cin >> length >> tmp_x >> tmp_y;
+
+
+        return new CurvedLine(length,tmp_x,tmp_y);
     }
 
 };
