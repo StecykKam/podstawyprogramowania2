@@ -1,0 +1,6 @@
+/home/kamil/Pulpit/Lab/podstawyprogramowania2/lab1/build/CMakeFiles/rebuild_cache.dir
+/home/kamil/Pulpit/Lab/podstawyprogramowania2/lab1/build/CMakeFiles/edit_cache.dir
+/home/kamil/Pulpit/Lab/podstawyprogramowania2/lab1/build/src/CMakeFiles/rebuild_cache.dir
+/home/kamil/Pulpit/Lab/podstawyprogramowania2/lab1/build/src/CMakeFiles/edit_cache.dir
+/home/kamil/Pulpit/Lab/podstawyprogramowania2/lab1/build/src/CMakeFiles/run_lab1.dir
+/home/kamil/Pulpit/Lab/podstawyprogramowania2/lab1/build/src/CMakeFiles/lab1.dir
