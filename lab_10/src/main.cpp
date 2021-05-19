@@ -28,6 +28,16 @@ class VectoredList
             return new_bucket;
         }
 
+        Bucket(Bucket* other){
+            next=other->next;
+            previous=other->previous;
+            size_of_bucket=other->size_of_bucket;
+            capacity_of_block=other->capacity_of_block;
+            for(int i=0;i<size_of_bucket;i++)
+                values[i]=other->values[i];
+        }
+        Bucket()=default;
+
     };
 
 
@@ -40,7 +50,22 @@ public:
     int size;
     int capacity;
 
-    
+    VectoredList& operator=(VectoredList& other){ //jest blad
+        size=other.size;
+        capacity=other.capacity;
+        head=new Bucket(other.head);
+        int blocks=size/10;
+        Bucket* wsk = other.head;
+        Bucket* wsk2 = head;
+        for(int i=1;i<blocks;i++){
+            Bucket* tmp = new Bucket(wsk->next);
+            tmp->previous=wsk2;
+            wsk2->next=tmp;
+            wsk2=tmp;
+        }
+        tail=wsk2;
+        return *this;
+    }
    
 
 /*
@@ -139,37 +164,106 @@ public:
    // iterator end(){return iterator(tail);}
 
 
-    class iterator
+    class VectoredListIterator
     {
     
     public:
         
-        string* tmp_element;
+        string tmp_element;
+        Bucket* list_element;
+        Bucket* cursor;
+        int size_of_container;
         int index = 0;
-        iterator(Bucket& tmp_bucket)
-        {
-            tmp_element = &tmp_bucket.values[0];
+      //  VectoredList object;
+        VectoredListIterator(VectoredList& v,int position):list_element(v.head)
+        {   
+            v.head->previous = 0;
+            index = position;
+            size_of_container = v.size;
+            Bucket* ptr_element = list_element;
+            int block = index / 10;
+
+            if(block >= v.size){throw std::runtime_error( "You are out of range of array!!!" );}
+
+            int location = index % 10;
+
+            for(int i=0;i<block;i++)
+            {
+                ptr_element = ptr_element -> next;
+            }
+             cursor = ptr_element;
+             tmp_element = ptr_element->values[location];
+
         }
 
-        iterator& operator++()
+        VectoredListIterator(Bucket* tmp_bucket)
         {
+            list_element = tmp_bucket;
+            cursor = tmp_bucket;
             
+
+        }
+
+        int good(){
+            
+            if((index < 0) && (cursor->previous == 0) ){return 0;}
+            else{return 1;}
+            
+        } // wsk przed headem
+        string& get(){return tmp_element;}
+
+        VectoredListIterator& operator++()
+        {
+            index++;
+            Bucket* ptr_element = list_element;
+            int block = index / 10;
+
+            if(block >= size_of_container){throw std::runtime_error( "You are out of range of array!!!" );}
+
+            int location = index % 10;
+
+            for(int i=0;i<block;i++)
+            {
+                ptr_element = ptr_element -> next;
+            }
+             cursor = ptr_element;
+             tmp_element = ptr_element->values[location];
         }
 
         string& operator*()
         {
-            
+            return cursor->values[index];
         }
 
-        bool operator!=(iterator& to_compare)
+        VectoredListIterator& operator--()
+        {
+            index--;
+            Bucket* ptr_element = list_element;
+            int block = index / 10;
+
+            if(block >= size_of_container){throw std::runtime_error( "You are out of range of array!!!" );}
+
+            int location = index % 10;
+
+            for(int i=0;i<block;i++)
+            {
+                ptr_element = ptr_element -> next;
+            }
+             cursor = ptr_element;
+             tmp_element = ptr_element->values[location];
+        }
+
+        bool operator!=(VectoredListIterator& to_compare)
         {
             return this->tmp_element == to_compare.tmp_element;
         }
 
+
+
     };
 
-    iterator begin(){return iterator(*head);}
-    iterator end(){return iterator(*tail);}
+  // iterator begin(){return iterator(head);}
+  // iterator end(){return iterator(tail);}
 
 
 };
@@ -253,18 +347,37 @@ int main()
 
 //
     
-    // for (VectoredList::VectoredListIterator ita(v, 101); ita.good(); --ita)
-    // {
-    //     cout << ita.get() << " ";
-    //     if (ita.cursor % 10 == 0)
-    //         cout << endl;
-    // }
+     for (VectoredList::VectoredListIterator ita(v, 101); ita.good(); --ita)
+    {
+        cout << ita.get() << " ";
+        //if (ita.cursor % 10 == 0)
+        cout << endl;
+     }
 
-    cout << endl << "---------- 3 ----------" << endl;;
-    // for (const auto &element : v)
-    //     cout << element << "AAA" << endl;
 
-    cout << endl << "---------- 4 ----------" << endl;
+//
+ /*   cout << " ITerator" << endl;
+    VectoredList::VectoredListIterator it(v,4);
+    cout << it.get();
+    --it;
+    cout << it.get();
+
+    cout << it.cursor->previous;
+
+
+    for(it;it.good();--it)
+    {
+        cout << it.get() << endl;
+    }
+*/
+//
+
+
+  //  cout << endl << "---------- 3 ----------" << endl;;
+  // for (const auto &element : v)
+ //   {     cout << element << "AAA" << endl;}
+
+  //  cout << endl << "---------- 4 ----------" << endl;
     // VectoredList::VectoredListIterator it3(v, 3);
     // VectoredList::VectoredListIterator it33(v, 33);
     // VectoredList::VectoredListIterator it45(v, 45);
