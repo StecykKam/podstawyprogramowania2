@@ -175,7 +175,7 @@ public:
         }
     }
 
-    void push_back(std::string value);
+    void push_back(const std::string& value);
 
     std::string& operator[](int index)const
     {
@@ -356,7 +356,7 @@ public:
 
 };
 
-void VectoredList::push_back(std::string value)
+void VectoredList::push_back(const std::string& value)
 {
 
    if(head == 0) // nic nie ma
