@@ -31,7 +31,7 @@ class VectoredList
         }
 
         Bucket(Bucket* other){
-            next=0; // nie chcemy wskazywac na to samo, tylko chcemy nowy bucket nie skorelowany z tym prekazywanym
+            next=0; // nie chcemy wskazywac na to samo, tylko chcemy nowy bucket nie skorelowany z tym przekazywanym
             previous=0;
             
             for(int i=0;i<N;++i){values[i]=" ";}
@@ -61,8 +61,8 @@ public:
 
     Bucket* head;
     Bucket* tail;
-    int size;  // current size
-    int capacity;
+    int size;  // current number of blocks
+    int capacity; // general capacity (all elements, whcich we can allocate or allocated)
 
 
 //////////////
@@ -74,18 +74,36 @@ public:
     
 /////////////
 
+   
+
     int VectoredListSize()const
     {
-        return size*N;
+        return size;
     }
 
+    int VectoredListCapacity()const{return capacity;}
+
+    void push_back(std::string &&value);
+
+    int how_many_elements_allocated()const
+    {
+        int sum = 0;
+        Bucket* tmp_head = head;
+        while(tmp_head)
+        {
+            sum += tmp_head->size_of_bucket;
+            tmp_head = tmp_head->next;
+        }
+        return sum;
+    }
 
     void free_me()
     {
 
         Bucket* tmp_to_del;
         for(head;head!=0;)
-        {
+        {   
+            head-> size_of_bucket = 0; // we free elements
             tmp_to_del = head;
             head=head->next;
             delete tmp_to_del;
@@ -144,7 +162,7 @@ public:
     {
         head = tail = 0;
         size = 0;
-        capacity = N;
+        capacity = 0; // change
     }
 
     ~VectoredList()
@@ -349,6 +367,7 @@ void VectoredList::push_back(std::string value)
        tail = new_node;
        head->previous = 0;
        tail->next = 0;
+       capacity+=N;
        //return true;
    }
 
@@ -366,6 +385,7 @@ void VectoredList::push_back(std::string value)
        new_node->previous = tail;
        tail->next = new_node; 
        tail = new_node; 
+       capacity+=N;
        //return true;
 
     }
@@ -376,6 +396,49 @@ void VectoredList::push_back(std::string value)
 }
 
 /////////////////////////////////////////////////
+
+
+void VectoredList::push_back(std::string &&value)
+{
+
+   if(head == 0) // nic nie ma
+   {
+       Bucket* new_node = Bucket::getBucket(value);
+       size++;
+       head = new_node;
+       tail = new_node;
+       head->previous = 0;
+       tail->next = 0;
+       capacity+=N;
+       //return true;
+   }
+
+
+    else if(head != 0 && tail != 0 && tail->size_of_bucket < tail->capacity_of_block)
+    {
+        tail->values[tail->size_of_bucket++] = value; // zwiekszenie indxu po isntrukcji
+        //return true;
+    }
+
+    else if(head != 0 && tail != 0 && tail->size_of_bucket >= tail->capacity_of_block)
+    {
+       Bucket* new_node = Bucket::getBucket(value); // new_node next juz wsakzuje na 0
+       size++;
+       new_node->previous = tail;
+       tail->next = new_node; 
+       tail = new_node; 
+       capacity+=N;
+       //return true;
+
+    }
+    
+    
+   // return false;
+
+}
+
+
+
 
 VectoredList::VectoredList(VectoredList &&v)
 {
@@ -392,18 +455,22 @@ VectoredList::VectoredList(VectoredList &&v)
     v.size = 0;
 }
 
-void VectoredList::assign(vector<string> v)
+void VectoredList::assign(vector<string> v) // here create copy
 {
 
    // cout << "size of vector = " << v.size() << endl;
 
-    for(int i=0;v.size();++i)
+    if(head)
     {
-        cout << v[i] << " ";
+        this->free_me();
     }
-
-
-
+    
+    for(int i = 0;i<v.size();++i)
+    {
+        string&& rref = move(v[i]);
+        this->push_back(rref);
+        //cout << rref << " in assing" << endl;
+    }
 }
 
 VectoredList VectoredList::operator+(const VectoredList& rhs)const
@@ -412,22 +479,31 @@ VectoredList VectoredList::operator+(const VectoredList& rhs)const
 
     const VectoredList& ref_to_cur = *this;
 
-    
+    Bucket* tmp_first = head;
+    Bucket* tmp_second = rhs.head;
 
-    for(int i=0;i<ref_to_cur.VectoredListSize();++i)
+
+    for(int i=0;i<ref_to_cur.VectoredListSize();++i,tmp_first = tmp_first->next)
     {   
-        new_container.push_back(ref_to_cur[i]);
-        //cout << ref_to_cur[i] << " ";
-    }
-
-    for(int i=0;i<rhs.VectoredListSize();++i)
-    {
-        new_container.push_back(rhs[i]);
-        //cout << rhs[i] << " ";
+        for(int j=0;j<tmp_first->size_of_bucket;++j)
+        {
+            new_container.push_back(ref_to_cur[j]);
+            //cout << ref_to_cur[j] << endl;
+        }
     }
 
     
 
+    for(int i=0;i<rhs.VectoredListSize();++i,tmp_second = tmp_second->next)
+    {
+        for(int j=0;j<tmp_second->size_of_bucket;++j)
+        {
+            new_container.push_back(rhs[j]);
+            //cout << rhs[j] << endl;
+        }
+    }
+
+    
     return new_container;  // it will be moved here
 
 }
@@ -478,7 +554,7 @@ int main(int argc, char *argv[])
 
     VectoredList v1(move(v));     // move(v) <==> lvalue -> xvalue
 
-    for (int i = 0; i < v1.VectoredListSize(); ++i)
+    for (int i = 0; i < v1.how_many_elements_allocated(); ++i)
     {
          cout << v1[i] << endl;
      
@@ -494,7 +570,7 @@ int main(int argc, char *argv[])
 
     v1 = move(v2);
 
-    for (int i = 0; i < v1.VectoredListSize(); ++i)
+    for (int i = 0; i < v1.how_many_elements_allocated(); ++i) //v1.VectoredListSize()
     {
         cout << v1[i] << endl;
     }
@@ -506,7 +582,8 @@ int main(int argc, char *argv[])
 
     v4 = v1 + v3;
 
-    for (int i = 0; i < v4.VectoredListSize(); ++i)
+
+    for (int i = 0; i < v4.how_many_elements_allocated(); ++i)
     {
         cout << v4[i] << endl;
     }
@@ -514,13 +591,18 @@ int main(int argc, char *argv[])
     cout << endl << "---------- 4 ----------" << endl;
     vector<string> V{"TEST 4.1", "TEST 4.2"};
 
-   // cout << v4.VectoredListSize() << " " <<v4.size << " " << v4.capacity << endl;
-    //v4.assign(V);
+   
+    v4.assign(V);
 
-    //for (int i = 0; i < v4.VectoredListSize(); ++i)
-   // {
-  //      cout << v4[i] << endl;
-   // }
+//
+   // cout << V[0] << " " << V[1] << endl;
+//
+//  cout << " How many el : " << v4.how_many_elements_allocated() << "size: " << v4.size << " " << v4.capacity << endl;
+
+    for (int i = 0; i < v4.how_many_elements_allocated(); ++i)
+    {
+       cout << v4[i] << endl;
+   }
 
 
 
